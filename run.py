@@ -14,7 +14,7 @@ else:
     exit()
 
 print('Spider is running (check all items, create temp file: attrs.json)...')
-subprocess.call('scrapy crawl main -a params={kw} -o attrs.json'.format(kw=kwargs), shell=True)
+# subprocess.call('scrapy crawl main -a params={kw} -o attrs.json'.format(kw=kwargs), shell=True)
 print('Spider closed.')
 
 try:
@@ -25,7 +25,7 @@ try:
         except (KeyError, IndexError):
             fail = False
         try:
-            cat = list(map(lambda c: c['category'], data))[0]
+            cat = list(map(lambda c: c['category'].replace('/', ' '), data))[0]
         except IndexError:
             cat = ''
         except KeyError:
@@ -46,7 +46,7 @@ else:
 
 
 print('Spider is running (start scraped info about items, create temp file info.csv)...')
-subprocess.call('scrapy crawl info', shell=True)
+# subprocess.call('scrapy crawl info', shell=True)
 
 print('Rename temp csv file...')
 try:
