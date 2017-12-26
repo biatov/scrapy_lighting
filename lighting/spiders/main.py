@@ -88,6 +88,6 @@ class Main(scrapy.Spider):
                     yield item
                 except (TypeError, IndexError):
                     pass
-            logger.info('Check page number %s', page)
+            logger.info('Check page number %s', '%s of %s' % (page, l_page-1))
         self.driver.close()
         self.display.stop()
