@@ -11,6 +11,7 @@ import scrapy
 class LightingItem(scrapy.Item):
     url = scrapy.Field()
     category = scrapy.Field()
+    fail = scrapy.Field()
 
 
 class AttrsItem(scrapy.Item):

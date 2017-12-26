@@ -41,6 +41,8 @@ class Attrs(scrapy.Spider):
         url = 'http://royallighting.com/search_individual_result.asp?current='
         item['category'] = cat if cat else 'No Category'
         for attr in attrs:
+            if self.driver.current_url == 'http://royallighting.com/landing.asp?':
+                return
             self.driver.get(''.join([url, attr]))
             try:
                 element = WebDriverWait(self.driver, 5).until(

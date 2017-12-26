@@ -17,31 +17,13 @@ class Main(scrapy.Spider):
     name = 'main'
     allowed_domains = ['royallighting.com']
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.kwargs = kwargs
-        if not kwargs:
-            start_urls = ["http://royallighting.com/search_result.asp?params=Installation:1;"]
-        else:
-            params = list()
-
-            def get_attr(attribute):
-                value = kwargs.get(attribute, '')
-                if value:
-                    return ':'.join([attribute.capitalize(), value])
-                return False
-
-            all_data = ['installation', 'description', 'style', 'width', 'options', 'brand', 'finish']
-
-            for each in all_data:
-                check = get_attr(each)
-                if check:
-                    params.append(check)
-
-            new_kwargs = ';'.join(params)
-            start_urls = [
-                "http://royallighting.com/search_result.asp?params={kw};".format(kw=new_kwargs)
-            ]
+    def __init__(self, params):
+        super().__init__(params)
+        kwargs = list(map(lambda i: i.capitalize(), params.split('+')))
+        kwargs = ';'.join(kwargs)
+        start_urls = [
+            "http://royallighting.com/search_result.asp?params={kw};".format(kw=kwargs)
+        ]
         self.start_urls = start_urls
         self.display = Display(visible=0, size=(1024, 768))
         self.display.start()
@@ -49,11 +31,7 @@ class Main(scrapy.Spider):
 
     def parse(self, response):
         item = LightingItem()
-        if not self.kwargs:
-            log_url = 'http://royallighting.com/search_result.asp?params=Installation:1;'
-        else:
-            log_url = self.start_urls[0]
-        logger.info('Scraped catalog - %s', log_url)
+        logger.info('Crawl catalog - %s', self.start_urls[0])
         self.driver.get('%s&Page=%s' % (self.start_urls[0], 1))
         try:
             element = WebDriverWait(self.driver, 5).until(
@@ -70,6 +48,11 @@ class Main(scrapy.Spider):
             l_page = 2
 
         for page in range(1, l_page):
+            if self.driver.current_url == 'http://royallighting.com/landing.asp?':
+                item['fail'] = True
+                yield item
+                logger.info('Bad request. Catalog %s does not exist.', self.start_urls[0])
+                return
             self.driver.get('%s&Page=%s' % (self.start_urls[0], page))
             try:
                 element = WebDriverWait(self.driver, 5).until(
